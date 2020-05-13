@@ -9,19 +9,6 @@ defmodule BooksList.Authors do
   alias BooksList.Authors.Author
 
   @doc """
-  Returns the list of authors.
-
-  ## Examples
-
-      iex> list_authors()
-      [%Author{}, ...]
-
-  """
-  def list_authors do
-    Repo.all(Author)
-  end
-
-  @doc """
   Gets a single author.
 
   Raises `Ecto.NoResultsError` if the Author does not exist.
@@ -74,22 +61,6 @@ defmodule BooksList.Authors do
   end
 
   @doc """
-  Deletes a author.
-
-  ## Examples
-
-      iex> delete_author(author)
-      {:ok, %Author{}}
-
-      iex> delete_author(author)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_author(%Author{} = author) do
-    Repo.delete(author)
-  end
-
-  @doc """
   Returns an `%Ecto.Changeset{}` for tracking author changes.
 
   ## Examples
@@ -118,22 +89,6 @@ defmodule BooksList.Authors do
   end
 
   @doc """
-  Gets a single article.
-
-  Raises `Ecto.NoResultsError` if the Article does not exist.
-
-  ## Examples
-
-      iex> get_article!(123)
-      %Article{}
-
-      iex> get_article!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_article!(id), do: Repo.get!(Article, id)
-
-  @doc """
   Creates a article.
 
   ## Examples
@@ -149,24 +104,6 @@ defmodule BooksList.Authors do
     %Article{}
     |> Article.changeset(attrs)
     |> Repo.insert()
-  end
-
-  @doc """
-  Updates a article.
-
-  ## Examples
-
-      iex> update_article(article, %{field: new_value})
-      {:ok, %Article{}}
-
-      iex> update_article(article, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_article(%Article{} = article, attrs) do
-    article
-    |> Article.changeset(attrs)
-    |> Repo.update()
   end
 
   @doc """

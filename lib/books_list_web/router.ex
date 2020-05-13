@@ -5,7 +5,12 @@ defmodule BooksListWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :authenticated do
+
+  end
+
   scope "/api", BooksListWeb do
-    pipe_through :api
+    pipe_through [:api, :autheticated]
+
   end
 end

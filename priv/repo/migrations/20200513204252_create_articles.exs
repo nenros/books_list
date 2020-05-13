@@ -7,6 +7,7 @@ defmodule BooksList.Repo.Migrations.CreateArticles do
       add :description, :text
       add :body, :text
       add :published_date, :utc_datetime
+      add :author_id, references(:authors, on_delete: :delete_all), null: false
 
       timestamps()
     end
