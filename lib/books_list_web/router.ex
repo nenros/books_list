@@ -19,7 +19,7 @@ defmodule BooksListWeb.Router do
     pipe_through [:api, :authenticated]
 
     resources "/author", AuthorController, singleton: true, only: [:show, :update]
-    resources "/article", ArticleController, only: [:index, :create, :delete]
+    resources "/articles", ArticleController, only: [:index, :create, :delete]
 
   end
 end

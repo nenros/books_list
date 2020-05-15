@@ -1,18 +1,12 @@
-# BooksList
+# Books list
 
-To start your Phoenix server:
-
-  * Setup the project with `mix setup`
-  * Start Phoenix endpoint with `mix phx.server`
-
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+## Endpoints
+### Unathorized: 
+* `POST` `/author` -> create new author, return authorization token in header `x-author-token`
+### Needs authorization
+By authorization I mean correct token `x-author-token`
+* `GET` `/api/author` -> return current author
+* `PATCH` `PUT` `/api/author` -> updates current author
+* `GET` `/api/articles` -> return list of articles with author details
+* `POST` `/api/articles` -> create article
+* `DELETE` `/api/articles/:id` -> deletes given article (need to be current author article)
