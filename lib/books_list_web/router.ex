@@ -6,11 +6,20 @@ defmodule BooksListWeb.Router do
   end
 
   pipeline :authenticated do
-
+    plug BooksListWeb.AuthenticatePlug
   end
 
   scope "/api", BooksListWeb do
-    pipe_through [:api, :autheticated]
+    pipe_through [:api]
+
+    resources "/author", AuthorController, singleton: true, only: [:create]
+  end
+
+  scope "/api", BooksListWeb do
+    pipe_through [:api, :authenticated]
+
+    resources "/author", AuthorController, singleton: true, only: [:show, :update]
+    resources "/article", ArticleController, only: [:index, :create, :delete]
 
   end
 end

@@ -12,4 +12,18 @@ defmodule BooksListWeb.FallbackController do
     |> put_view(BooksListWeb.ErrorView)
     |> render(:"404")
   end
+
+  def call(conn, {:error, :unauthorized}) do
+    conn
+    |> put_status(:unauthorized)
+    |> put_view(BooksListWeb.ErrorView)
+    |> render("401.json", message: "Unauthorized")
+  end
+
+  def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(BooksListWeb.ChangesetView)
+    |> render(:"error", changeset: changeset)
+  end
 end

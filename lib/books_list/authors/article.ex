@@ -5,19 +5,18 @@ defmodule BooksList.Authors.Article do
   schema "articles" do
     field :body, :string
     field :description, :string
-    field :published_date, :utc_datetime
     field :title, :string
 
-    belongs_to :author, Author
+    belongs_to :author, BooksList.Authors.Author
 
-    timestamps()
+    timestamps(inserted_at: :published_date)
   end
 
   @doc false
   def changeset(article, attrs) do
     article
-    |> cast(attrs, [:title, :description, :body, :published_date])
-    |> validate_required([:title, :body, :published_date])
+    |> cast(attrs, [:title, :description, :body])
+    |> validate_required([:title, :body])
     |> validate_length(:title, max: 150)
   end
 end

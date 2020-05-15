@@ -1,86 +1,92 @@
 defmodule BooksListWeb.ArticleControllerTest do
   use BooksListWeb.ConnCase
 
-  alias BooksList.Authors
-  alias BooksList.Authors.Article
-
-  @create_attrs %{
-
-  }
-  @update_attrs %{
-
-  }
-  @invalid_attrs %{}
-
-  def fixture(:article) do
-    {:ok, article} = Authors.create_article(@create_attrs)
-    article
-  end
+  import BooksList.Factory
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
   describe "index" do
-    test "lists all articles", %{conn: conn} do
+    setup [:create_author]
+
+    test "return 401 for not authorized user", %{conn: conn} do
       conn = get(conn, Routes.article_path(conn, :index))
-      assert json_response(conn, 200)["data"] == []
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
+    end
+
+    test "return list of articles with author details", %{conn: conn, author: author} do
+      author1 = insert(:author)
+      insert_list(4, :article, author_id: author1.id)
+      insert_list(2, :article, author_id: author.id)
+
+      conn = conn
+             |> put_req_header("x-author-token", author.token)
+             |> get(Routes.article_path(conn, :index))
+      assert json_response(conn, 200)["data"] != []
     end
   end
 
   describe "create article" do
-    test "renders article when data is valid", %{conn: conn} do
-      conn = post(conn, Routes.article_path(conn, :create), article: @create_attrs)
+    setup [:create_author]
+
+    test "renders article when data is valid", %{conn: conn, author: author} do
+      conn = conn
+             |> put_req_header("x-author-token", author.token)
+             |> post(Routes.article_path(conn, :create), article: string_params_for(:article))
       assert %{"id" => id} = json_response(conn, 201)["data"]
-
-      conn = get(conn, Routes.article_path(conn, :show, id))
-
-      assert %{
-               "id" => id
-             } = json_response(conn, 200)["data"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.article_path(conn, :create), article: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
-    end
-  end
-
-  describe "update article" do
-    setup [:create_article]
-
-    test "renders article when data is valid", %{conn: conn, article: %Article{id: id} = article} do
-      conn = put(conn, Routes.article_path(conn, :update, article), article: @update_attrs)
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
-
-      conn = get(conn, Routes.article_path(conn, :show, id))
-
-      assert %{
-               "id" => id
-             } = json_response(conn, 200)["data"]
+    test "renders errors when data is invalid", %{conn: conn, author: author} do
+      conn = conn
+             |> put_req_header("x-author-token", author.token)
+             |> post(Routes.article_path(conn, :create), article: %{})
+      assert json_response(conn, 400)["errors"] != %{body: ["can't be blank"], title: ["can't be blank"]}
     end
 
-    test "renders errors when data is invalid", %{conn: conn, article: article} do
-      conn = put(conn, Routes.article_path(conn, :update, article), article: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
+    test "don't allow create to not authorized user", %{conn: conn} do
+      conn = conn
+             |> post(Routes.article_path(conn, :create), article: %{})
+      assert  %{"detail" => "Unauthorized"} = json_response(conn, 401)["errors"]
     end
   end
 
   describe "delete article" do
-    setup [:create_article]
+    setup [:create_article_with_author]
 
-    test "deletes chosen article", %{conn: conn, article: article} do
+    test "delete article for not authorized should return error", %{conn: conn, article: article} do
+
       conn = delete(conn, Routes.article_path(conn, :delete, article))
-      assert response(conn, 204)
 
-      assert_error_sent 404, fn ->
-        get(conn, Routes.article_path(conn, :show, article))
-      end
+      assert  %{"detail" => "Unauthorized"} = json_response(conn, 401)["errors"]
+    end
+
+    test "delete other user article return error", %{conn: conn, article: article} do
+      author = insert(:author_with_token)
+
+      conn = conn
+             |> put_req_header("x-author-token", author.token)
+             |> delete(Routes.article_path(conn, :delete, article))
+
+      assert  %{"detail" => "Unauthorized"} = json_response(conn, 401)["errors"]
+    end
+
+    test "deletes chosen article", %{conn: conn, article: article, author: author} do
+      conn = conn
+             |> put_req_header("x-author-token", author.token)
+             |> delete(Routes.article_path(conn, :delete, article))
+      assert response(conn, 204)
     end
   end
 
-  defp create_article(_) do
-    article = fixture(:article)
-    %{article: article}
+  defp create_article_with_author(_) do
+    author = insert(:author_with_token)
+    article = insert(:article, author_id: author.id)
+    %{article: article, author: author}
+  end
+
+  defp create_author(_) do
+    author = insert(:author_with_token)
+    %{author: author}
   end
 end

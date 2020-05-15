@@ -24,6 +24,27 @@ defmodule BooksList.Authors do
   """
   def get_author!(id), do: Repo.get!(Author, id)
 
+
+  @doc """
+  Gets a single author using token.
+
+  Raises `Ecto.NoResultsError` if the Author does not exist.
+
+  ## Examples
+
+      iex> get_author_by_token!("TEST-UUID")
+      %Author{}
+
+      iex> get_author!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+
+  def get_author_by_token!(token) do
+    Repo.get_by!(Author, token: token)
+  end
+
+
   @doc """
   Creates a author.
 
@@ -38,7 +59,7 @@ defmodule BooksList.Authors do
   """
   def create_author(attrs \\ %{}) do
     %Author{}
-    |> Author.changeset(attrs)
+    |> Author.create_changeset(attrs)
     |> Repo.insert()
   end
 
@@ -76,6 +97,23 @@ defmodule BooksList.Authors do
   alias BooksList.Authors.Article
 
   @doc """
+  Gets a single article.
+
+  Raises `Ecto.NoResultsError` if the Article does not exist.
+
+  ## Examples
+
+      iex> get_article!(123)
+      %Article{}
+
+      iex> get_article!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_article!(id), do: Repo.get!(Article, id)
+
+
+  @doc """
   Returns the list of articles.
 
   ## Examples
@@ -89,20 +127,36 @@ defmodule BooksList.Authors do
   end
 
   @doc """
+  Returns the list of articles with author details.
+
+  ## Examples
+
+      iex> list_articles()
+      [%Article{}, ...]
+
+  """
+  def list_articles_with_author_details do
+    Article
+    |> preload(:author)
+    |> Repo.all()
+  end
+
+  @doc """
   Creates a article.
 
   ## Examples
 
-      iex> create_article(%{field: value})
+      iex> create_article(author, %{field: value})
       {:ok, %Article{}}
 
-      iex> create_article(%{field: bad_value})
+      iex> create_article(author, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_article(attrs \\ %{}) do
+  def create_article(author, attrs \\ %{}) do
     %Article{}
     |> Article.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:author, author)
     |> Repo.insert()
   end
 
